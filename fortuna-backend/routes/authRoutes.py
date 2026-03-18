@@ -6,7 +6,6 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 
 
 def _missing(*fields):
-    """Return the first field name that is missing/empty from request JSON."""
     data = request.get_json() or {}
     for f in fields:
         if not data.get(f):
@@ -22,11 +21,9 @@ def player_register():
         if not data.get(field):
             return jsonify({"error": f"'{field}' is required"}), 400
 
-    # Age check — enforced here since we removed it from the DB constraint
     if not is_old_enough(data["dob"]):
         return jsonify({"error": "Player must be at least 18 years old"}), 400
 
-    # Duplicate email / username check
     existing = query(
         "SELECT PlayerID FROM Player WHERE Email = %s OR Username = %s",
         (data["email"], data["username"]),
