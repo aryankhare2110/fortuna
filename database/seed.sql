@@ -4,19 +4,19 @@ SET session_replication_role = 'replica';
 
 --  ADMINS  (3)
 INSERT INTO Admin (FirstName, LastName, Email, PasswordHashed) VALUES
-('Rohan',   'Mehta',   'rohan.admin@fortuna.com',  '$2b$12$admin_hash_001'),
-('Priya',   'Sharma',  'priya.admin@fortuna.com',  '$2b$12$admin_hash_002'),
-('Vikram',  'Nair',    'vikram.admin@fortuna.com', '$2b$12$admin_hash_003');
+('Rohan',   'Mehta',   'rohan.admin@fortuna.com',  '$2b$12$a0srfXWGI9Wn5/suEgozvOI1azhjcAVSr6vC7.5P44v3XZOkXS5NG'),
+('Priya',   'Sharma',  'priya.admin@fortuna.com',  '$2b$12$a0srfXWGI9Wn5/suEgozvOI1azhjcAVSr6vC7.5P44v3XZOkXS5NG'),
+('Vikram',  'Nair',    'vikram.admin@fortuna.com', '$2b$12$a0srfXWGI9Wn5/suEgozvOI1azhjcAVSr6vC7.5P44v3XZOkXS5NG');
 
 
 
 --  DEALERS  (4)
 INSERT INTO Dealer (FirstName, LastName, Email, PasswordHashed, IsAvailable,
                     RoundsConducted, TotalBetsHandled, TotalPayouts) VALUES
-('Amit',    'Kapoor',  'amit.dealer@fortuna.com',   '$2b$12$dealer_hash_001', TRUE,  28, 42, 18500.00),
-('Sneha',   'Rao',     'sneha.dealer@fortuna.com',  '$2b$12$dealer_hash_002', TRUE,  22, 35, 14200.00),
-('Karan',   'Singh',   'karan.dealer@fortuna.com',  '$2b$12$dealer_hash_003', FALSE, 15, 20,  8750.00),
-('Divya',   'Iyer',    'divya.dealer@fortuna.com',  '$2b$12$dealer_hash_004', TRUE,  19, 30, 12300.00);
+('Amit',    'Kapoor',  'amit.dealer@fortuna.com',   '$2b$12$a0srfXWGI9Wn5/suEgozvOI1azhjcAVSr6vC7.5P44v3XZOkXS5NG', TRUE,  28, 42, 18500.00),
+('Sneha',   'Rao',     'sneha.dealer@fortuna.com',  '$2b$12$a0srfXWGI9Wn5/suEgozvOI1azhjcAVSr6vC7.5P44v3XZOkXS5NG', TRUE,  22, 35, 14200.00),
+('Karan',   'Singh',   'karan.dealer@fortuna.com',  '$2b$12$a0srfXWGI9Wn5/suEgozvOI1azhjcAVSr6vC7.5P44v3XZOkXS5NG', FALSE, 15, 20,  8750.00),
+('Divya',   'Iyer',    'divya.dealer@fortuna.com',  '$2b$12$a0srfXWGI9Wn5/suEgozvOI1azhjcAVSr6vC7.5P44v3XZOkXS5NG', TRUE,  19, 30, 12300.00);
 
 
 --  GAMES  (3)
@@ -33,21 +33,21 @@ INSERT INTO Player (
     PasswordHashed, WalletBalance, BlockStatus,
     TotalWinnings, RewardPoints, GamesPlayed
 ) VALUES
-('ace_aryan',    'Aryan',    'Khare',    '1999-04-12', 'aryan@players.com',    '$2b$12$player_hash_001', 12500.00, FALSE,  8200.00, 340, 22),
-('akash_bet',    'Akash',    'Adur',     '1998-07-23', 'akash@players.com',    '$2b$12$player_hash_002',  9800.00, FALSE,  6100.00, 270, 18),
-('pranshu_p',    'Pranshu',  'Prakash',  '2000-01-05', 'pranshu@players.com',  '$2b$12$player_hash_003', 15200.00, FALSE, 11300.00, 480, 30),
-('lucky_lena',   'Lena',     'D''Souza', '1995-09-17', 'lena@players.com',     '$2b$12$player_hash_004',  3200.00, FALSE,  2800.00, 120, 10),
-('high_roller',  'Rahul',    'Gupta',    '1990-03-28', 'rahul@players.com',    '$2b$12$player_hash_005', 45000.00, FALSE, 32000.00, 900, 55),
-('sneaky_sam',   'Sameer',   'Khan',     '1997-11-02', 'sameer@players.com',   '$2b$12$player_hash_006',   500.00, TRUE,   1200.00,  45,  8),
-('royal_riya',   'Riya',     'Patel',    '2001-06-14', 'riya@players.com',     '$2b$12$player_hash_007',  7600.00, FALSE,  5400.00, 230, 16),
-('bluff_master', 'Nikhil',   'Joshi',    '1993-12-30', 'nikhil@players.com',   '$2b$12$player_hash_008', 22000.00, FALSE, 18700.00, 710, 42),
-('dice_queen',   'Kavya',    'Menon',    '1996-08-08', 'kavya@players.com',    '$2b$12$player_hash_009',  6300.00, FALSE,  4900.00, 195, 14),
-('all_in_anuj',  'Anuj',     'Verma',    '1994-02-19', 'anuj@players.com',     '$2b$12$player_hash_010',  1100.00, FALSE,   900.00,  38,  7),
-('sharp_shruti', 'Shruti',   'Bose',     '1999-10-25', 'shruti@players.com',   '$2b$12$player_hash_011', 18400.00, FALSE, 14200.00, 590, 35),
-('wild_waqar',   'Waqar',    'Siddiqui', '1992-05-11', 'waqar@players.com',    '$2b$12$player_hash_012',  4700.00, FALSE,  3600.00, 155, 12),
-('zen_zara',     'Zara',     'Mirza',    '2000-03-07', 'zara@players.com',     '$2b$12$player_hash_013',  8900.00, FALSE,  7100.00, 300, 20),
-('lucky_laxmi',  'Laxmi',    'Reddy',    '1991-07-16', 'laxmi@players.com',    '$2b$12$player_hash_014', 11200.00, FALSE,  9500.00, 395, 26),
-('fast_farhan',  'Farhan',   'Sheikh',   '1997-04-03', 'farhan@players.com',   '$2b$12$player_hash_015',  2800.00, FALSE,  1900.00,  80,  9);
+('ace_aryan',    'Aryan',    'Khare',    '1999-04-12', 'aryan@players.com',    '$2b$12$a0srfXWGI9Wn5/suEgozvOI1azhjcAVSr6vC7.5P44v3XZOkXS5NG', 12500.00, FALSE,  8200.00, 340, 22),
+('akash_bet',    'Akash',    'Adur',     '1998-07-23', 'akash@players.com',    '$2b$12$a0srfXWGI9Wn5/suEgozvOI1azhjcAVSr6vC7.5P44v3XZOkXS5NG',  9800.00, FALSE,  6100.00, 270, 18),
+('pranshu_p',    'Pranshu',  'Prakash',  '2000-01-05', 'pranshu@players.com',  '$2b$12$a0srfXWGI9Wn5/suEgozvOI1azhjcAVSr6vC7.5P44v3XZOkXS5NG', 15200.00, FALSE, 11300.00, 480, 30),
+('lucky_lena',   'Lena',     'D''Souza', '1995-09-17', 'lena@players.com',     '$2b$12$a0srfXWGI9Wn5/suEgozvOI1azhjcAVSr6vC7.5P44v3XZOkXS5NG',  3200.00, FALSE,  2800.00, 120, 10),
+('high_roller',  'Rahul',    'Gupta',    '1990-03-28', 'rahul@players.com',    '$2b$12$a0srfXWGI9Wn5/suEgozvOI1azhjcAVSr6vC7.5P44v3XZOkXS5NG', 45000.00, FALSE, 32000.00, 900, 55),
+('sneaky_sam',   'Sameer',   'Khan',     '1997-11-02', 'sameer@players.com',   '$2b$12$a0srfXWGI9Wn5/suEgozvOI1azhjcAVSr6vC7.5P44v3XZOkXS5NG',   500.00, TRUE,   1200.00,  45,  8),
+('royal_riya',   'Riya',     'Patel',    '2001-06-14', 'riya@players.com',     '$2b$12$a0srfXWGI9Wn5/suEgozvOI1azhjcAVSr6vC7.5P44v3XZOkXS5NG',  7600.00, FALSE,  5400.00, 230, 16),
+('bluff_master', 'Nikhil',   'Joshi',    '1993-12-30', 'nikhil@players.com',   '$2b$12$a0srfXWGI9Wn5/suEgozvOI1azhjcAVSr6vC7.5P44v3XZOkXS5NG', 22000.00, FALSE, 18700.00, 710, 42),
+('dice_queen',   'Kavya',    'Menon',    '1996-08-08', 'kavya@players.com',    '$2b$12$a0srfXWGI9Wn5/suEgozvOI1azhjcAVSr6vC7.5P44v3XZOkXS5NG',  6300.00, FALSE,  4900.00, 195, 14),
+('all_in_anuj',  'Anuj',     'Verma',    '1994-02-19', 'anuj@players.com',     '$2b$12$a0srfXWGI9Wn5/suEgozvOI1azhjcAVSr6vC7.5P44v3XZOkXS5NG',  1100.00, FALSE,   900.00,  38,  7),
+('sharp_shruti', 'Shruti',   'Bose',     '1999-10-25', 'shruti@players.com',   '$2b$12$a0srfXWGI9Wn5/suEgozvOI1azhjcAVSr6vC7.5P44v3XZOkXS5NG', 18400.00, FALSE, 14200.00, 590, 35),
+('wild_waqar',   'Waqar',    'Siddiqui', '1992-05-11', 'waqar@players.com',    '$2b$12$a0srfXWGI9Wn5/suEgozvOI1azhjcAVSr6vC7.5P44v3XZOkXS5NG',  4700.00, FALSE,  3600.00, 155, 12),
+('zen_zara',     'Zara',     'Mirza',    '2000-03-07', 'zara@players.com',     '$2b$12$a0srfXWGI9Wn5/suEgozvOI1azhjcAVSr6vC7.5P44v3XZOkXS5NG',  8900.00, FALSE,  7100.00, 300, 20),
+('lucky_laxmi',  'Laxmi',    'Reddy',    '1991-07-16', 'laxmi@players.com',    '$2b$12$a0srfXWGI9Wn5/suEgozvOI1azhjcAVSr6vC7.5P44v3XZOkXS5NG', 11200.00, FALSE,  9500.00, 395, 26),
+('fast_farhan',  'Farhan',   'Sheikh',   '1997-04-03', 'farhan@players.com',   '$2b$12$a0srfXWGI9Wn5/suEgozvOI1azhjcAVSr6vC7.5P44v3XZOkXS5NG',  2800.00, FALSE,  1900.00,  80,  9);
 
 
 --  GAME SESSIONS  (12 sessions across 3 games, 4 dealers)
