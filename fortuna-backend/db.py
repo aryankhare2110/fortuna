@@ -36,7 +36,12 @@ def query(sql: str, params: tuple = (), fetchone: bool = False):
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.execute(sql, params)
-            return cur.fetchone() if fetchone else cur.fetchall()
+            result = cur.fetchone() if fetchone else cur.fetchall()
+        conn.commit()
+        return result
+    except Exception as e:
+        conn.rollback()
+        raise e
     finally:
         release_db(conn)
 

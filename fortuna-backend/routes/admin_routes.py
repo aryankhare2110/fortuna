@@ -233,25 +233,26 @@ def create_player(current_user):
     return jsonify(dict(player)), 201
 
 
-@admin_bp.delete("/players/<int:player_id>")
+@admin_bp.post("/players/<int:player_id>/ban")
 @require_auth("admin")
-def delete_player(current_user, player_id):
+def ban_player(current_user, player_id):
     """
-    Permanently delete a player. Cascades to Bet, Wallet_Transaction,
-    Leaderboard (all have ON DELETE CASCADE on PlayerID).
+    Ban or unban a player via the admin dashboard.
     """
     player = query(
-        "SELECT Username FROM Player WHERE PlayerID = %s",
+        "SELECT Username, BlockStatus FROM Player WHERE PlayerID = %s",
         (player_id,),
         fetchone=True
     )
     if not player:
         return jsonify({"error": "Player not found"}), 404
 
-    execute("DELETE FROM Player WHERE PlayerID = %s", (player_id,))
+    new_status = not player["blockstatus"]
+    execute("UPDATE Player SET BlockStatus = %s WHERE PlayerID = %s", (new_status, player_id))
 
+    action = "ban" if new_status else "unban"
     return jsonify({
-        "message": f"Player '{player['username']}' permanently deleted"
+        "message": f"Player '{player['username']}' {action}ned"
     }), 200
 
 

@@ -211,8 +211,10 @@ def ban_log(current_user):
 @require_auth("dealer")
 def flagged_players(current_user):
     """
-    Players who placed all-loss bets or more than 3 bets in a single
-    session supervised by this dealer — potentially suspicious activity.
+    Players who show highly suspicious anomalies:
+    - More than 10 bets in a single session (Bot/scriptting)
+    - Wagered more than ₹2,500 in a session (High risk)
+    - Payouts exceeding ₹5,000 in a session (Card counting/Exploits)
     """
     flagged = query(
         """
@@ -220,20 +222,22 @@ def flagged_players(current_user):
             p.PlayerID, p.Username, p.Email, p.BlockStatus,
             suspicious.SessionID,
             suspicious.bet_count,
-            suspicious.all_losses,
+            suspicious.total_wagered,
+            suspicious.total_payout,
             bl.ActionTime AS ban_time,
             bl.Reason     AS ban_reason
         FROM (
             SELECT
                 b.PlayerID,
                 b.SessionID,
-                COUNT(*)                    AS bet_count,
-                BOOL_AND(b.Result = 'loss') AS all_losses
+                COUNT(*)      AS bet_count,
+                SUM(b.Amount) AS total_wagered,
+                SUM(b.Payout) AS total_payout
             FROM Bet b
             JOIN Game_Session gs ON gs.SessionID = b.SessionID
             WHERE gs.DealerID = %s
             GROUP BY b.PlayerID, b.SessionID
-            HAVING COUNT(*) > 3 OR BOOL_AND(b.Result = 'loss')
+            HAVING COUNT(*) > 10 OR SUM(b.Amount) > 2500 OR SUM(b.Payout) > 5000
         ) suspicious
         JOIN Player p ON p.PlayerID = suspicious.PlayerID
         LEFT JOIN LATERAL (
@@ -245,7 +249,7 @@ def flagged_players(current_user):
             ORDER BY ActionTime DESC
             LIMIT 1
         ) bl ON TRUE
-        ORDER BY suspicious.bet_count DESC
+        ORDER BY suspicious.total_wagered DESC
         """,
         (current_user["id"], current_user["id"])
     )

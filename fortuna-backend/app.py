@@ -1,7 +1,11 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 from db import init_db_pool
-from routes.authRoutes import auth_bp
+from routes.auth_routes import auth_bp
+from routes.admin_routes import admin_bp
+from routes.player_routes import player_bp
+from routes.game_routes import game_bp
+from routes.dealer_routes import dealer_bp
 
 
 def create_app() -> Flask:
@@ -13,6 +17,10 @@ def create_app() -> Flask:
     init_db_pool()
 
     app.register_blueprint(auth_bp)
+    app.register_blueprint(admin_bp)
+    app.register_blueprint(player_bp)
+    app.register_blueprint(game_bp)
+    app.register_blueprint(dealer_bp)
 
     @app.errorhandler(404)
     def not_found(e):
@@ -35,4 +43,4 @@ def create_app() -> Flask:
 
 if __name__ == "__main__":
     app = create_app()
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5001)

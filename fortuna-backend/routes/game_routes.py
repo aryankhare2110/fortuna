@@ -30,9 +30,9 @@ def get_game(game_id):
     return jsonify(dict(game)), 200
 
 @game_bp.post("/session/start")
-@require_auth("dealer")
+@require_auth("dealer", "player")
 def start_session(current_user):
-    """Dealer starts a new game session."""
+    """Dealer or Player starts a new game session."""
     data    = request.get_json() or {}
     game_id = data.get("game_id")
 
@@ -47,22 +47,27 @@ def start_session(current_user):
     if not game:
         return jsonify({"error": "Game not found or inactive"}), 404
 
+    dealer_id = current_user["id"]
+    if current_user["role"] == "player":
+        dealer = query("SELECT DealerID FROM Dealer WHERE IsAvailable = TRUE ORDER BY RANDOM() LIMIT 1", fetchone=True)
+        dealer_id = dealer["dealerid"] if dealer else 1
+
     session = execute(
         """
         INSERT INTO Game_Session (GameID, DealerID)
         VALUES (%s, %s)
         RETURNING SessionID, GameID, DealerID, StartTime
         """,
-        (game_id, current_user["id"]),
+        (game_id, dealer_id),
         returning=True
     )
     return jsonify(dict(session)), 201
 
 
 @game_bp.patch("/session/<int:session_id>/end")
-@require_auth("dealer")
+@require_auth("dealer", "player")
 def end_session(current_user, session_id):
-    """Dealer ends a session and sets the outcome."""
+    """Ends a session and sets the outcome."""
     data    = request.get_json() or {}
     outcome = data.get("outcome")
 
@@ -70,11 +75,19 @@ def end_session(current_user, session_id):
     if outcome not in valid_outcomes:
         return jsonify({"error": f"outcome must be one of {valid_outcomes}"}), 400
 
-    session = query(
-        "SELECT SessionID, EndTime FROM Game_Session WHERE SessionID = %s AND DealerID = %s",
-        (session_id, current_user["id"]),
-        fetchone=True
-    )
+    if current_user["role"] == "dealer":
+        session = query(
+            "SELECT SessionID, EndTime FROM Game_Session WHERE SessionID = %s AND DealerID = %s",
+            (session_id, current_user["id"]),
+            fetchone=True
+        )
+    else:
+        session = query(
+            "SELECT SessionID, EndTime FROM Game_Session WHERE SessionID = %s",
+            (session_id,),
+            fetchone=True
+        )
+
     if not session:
         return jsonify({"error": "Session not found or not yours"}), 404
     if session["endtime"] is not None:
@@ -160,6 +173,11 @@ def place_bet(current_user):
     if session["endtime"] is not None:
         return jsonify({"error": "Cannot bet on a closed session"}), 400
 
+    # Strong manual wallet check
+    player = query("SELECT WalletBalance FROM Player WHERE PlayerID = %s", (current_user["id"],), fetchone=True)
+    if not player or float(player["walletbalance"]) < float(amount):
+        return jsonify({"error": "Insufficient wallet balance"}), 400
+
     try:
         bet = execute(
             """
@@ -181,12 +199,31 @@ def place_bet(current_user):
              bet["bettime"], bet["playerid"], bet["sessionid"])
         )
 
+        # Force a transaction log for the frontend dashboard
+        if float(amount) > 0:
+            execute(
+                """
+                INSERT INTO Wallet_Transaction (PlayerID, Type, Amount, BalanceAfter, PointTransaction)
+                VALUES (%s, 'bet_debit', %s, (SELECT WalletBalance FROM Player WHERE PlayerID = %s), 0)
+                """,
+                (current_user["id"], float(amount), current_user["id"])
+            )
+        if float(payout) > 0:
+            execute(
+                """
+                INSERT INTO Wallet_Transaction (PlayerID, Type, Amount, BalanceAfter, PointTransaction)
+                VALUES (%s, 'bet_credit', %s, (SELECT WalletBalance FROM Player WHERE PlayerID = %s), 0)
+                """,
+                (current_user["id"], float(payout), current_user["id"])
+            )
+
     except Exception as e:
         error_msg = str(e)
         if "blocked" in error_msg.lower():
             return jsonify({"error": "Your account is suspended"}), 403
         if "outside game limits" in error_msg.lower():
-            return jsonify({"error": error_msg}), 400
+            clean_msg = error_msg.split("CONTEXT:")[0].strip()
+            return jsonify({"error": clean_msg}), 400
         if "wallet" in error_msg.lower() or "balance" in error_msg.lower():
             return jsonify({"error": "Insufficient wallet balance"}), 400
         return jsonify({"error": "Could not place bet"}), 500

@@ -16,7 +16,7 @@ def check_password(plain: str, hashed: str) -> bool:
 
 def create_token(user_id: int, role: str) -> str:
     payload = {
-        "sub":  user_id,
+        "sub":  str(user_id),
         "role": role,
         "exp":  datetime.now(timezone.utc) + timedelta(hours=Config.JWT_EXPIRY_HOURS),
         "iat":  datetime.now(timezone.utc),
@@ -47,7 +47,7 @@ def require_auth(*allowed_roles: str):
             if allowed_roles and payload["role"] not in allowed_roles:
                 return jsonify({"error": "Access forbidden for your role"}), 403
 
-            current_user = {"id": payload["sub"], "role": payload["role"]}
+            current_user = {"id": int(payload["sub"]), "role": payload["role"]}
             return f(*args, current_user=current_user, **kwargs)
         return wrapper
     return decorator
