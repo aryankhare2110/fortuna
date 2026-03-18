@@ -1,0 +1,265 @@
+import { useState, useEffect, useRef } from "react"
+import { useNavigate } from "react-router-dom"
+import { gameAPI, playerAPI } from "../../api/axios"
+import { Button, Badge } from "../../components/ui/index"
+
+const RED_NUMS   = new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36])
+const BLACK_NUMS = new Set([2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35])
+const WHEEL      = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26]
+
+const BET_TYPES = [
+  { key: "red",   label: "Red",    payout: 2, check: n => RED_NUMS.has(n)              },
+  { key: "black", label: "Black",  payout: 2, check: n => BLACK_NUMS.has(n)            },
+  { key: "even",  label: "Even",   payout: 2, check: n => n !== 0 && n % 2 === 0       },
+  { key: "odd",   label: "Odd",    payout: 2, check: n => n !== 0 && n % 2 !== 0       },
+  { key: "low",   label: "1–18",   payout: 2, check: n => n >= 1  && n <= 18           },
+  { key: "high",  label: "19–36",  payout: 2, check: n => n >= 19 && n <= 36           },
+]
+
+const CHIPS = [25, 100, 500, 1000]
+
+function numTextColor(n) {
+  if (n === 0)          return "text-green-400"
+  if (RED_NUMS.has(n))  return "text-red-400"
+  return                       "text-casino-text"
+}
+
+export default function Roulette() {
+  const navigate  = useNavigate()
+  const wheelRef  = useRef(null)
+
+  const [gameInfo,  setGameInfo]  = useState(null)
+  const [profile,   setProfile]   = useState(null)
+  const [betType,   setBetType]   = useState(null)
+  const [betAmount, setBetAmount] = useState(100)
+  const [spinning,  setSpinning]  = useState(false)
+  const [landed,    setLanded]    = useState(null)
+  const [result,    setResult]    = useState(null)
+  const [error,     setError]     = useState("")
+
+  useEffect(() => {
+    gameAPI.listGames().then(r => setGameInfo(r.data.find(g => g.gamename === "Roulette")))
+    playerAPI.getProfile().then(r => setProfile(r.data))
+  }, [])
+
+  const spin = async () => {
+    if (!betType) { setError("Select a bet type first"); return }
+    if (!gameInfo) return
+    const amt = Number(betAmount)
+    if (isNaN(amt) || amt <= 0) {
+      setError("Please enter a valid bet amount"); return;
+    }
+    if (amt < Number(gameInfo.minbet)) {
+      setError(`Minimum bet is ₹${Number(gameInfo.minbet).toLocaleString("en-IN")}`); return;
+    }
+    if (amt > Number(gameInfo.maxbet)) {
+      setError(`Maximum bet is ₹${Number(gameInfo.maxbet).toLocaleString("en-IN")}`); return;
+    }
+    if (amt > Number(profile?.walletbalance || 0)) {
+      setError("Insufficient wallet balance"); return;
+    }
+    setError(""); setSpinning(true); setLanded(null); setResult(null)
+
+    const num    = WHEEL[Math.floor(Math.random() * WHEEL.length)]
+    const betObj = BET_TYPES.find(b => b.key === betType)
+    const won    = betObj.check(num)
+    const payout = won ? Number(betAmount) * betObj.payout : 0
+    const outcome = won ? "win" : "loss"
+
+    // Spin animation
+    if (wheelRef.current) {
+      const idx        = WHEEL.indexOf(num)
+      const degPerSlot = 360 / WHEEL.length
+      const targetDeg  = 360 * 6 - (idx * degPerSlot)
+      wheelRef.current.style.transition = "transform 3.5s cubic-bezier(0.17,0.67,0.35,1)"
+      wheelRef.current.style.transform  = `rotate(${targetDeg}deg)`
+    }
+
+    await new Promise(r => setTimeout(r, 3700))
+    setLanded(num); setSpinning(false)
+
+    try {
+      const sess = await gameAPI.startSession(gameInfo.gameid)
+      await gameAPI.placeBet({ session_id: sess.data.sessionid, amount: Number(betAmount), result: outcome, payout })
+      await gameAPI.endSession(sess.data.sessionid, won ? "player_win" : "dealer_win")
+      const updated = await playerAPI.getProfile()
+      setProfile(updated.data)
+      setResult({ outcome, payout, num, message: won ? `${num} — You win!` : `${num} — Better luck next time.` })
+    } catch (e) { setError(e.response?.data?.error || "Failed to record bet") }
+  }
+
+  const reset = () => {
+    setLanded(null); setResult(null)
+    if (wheelRef.current) {
+      wheelRef.current.style.transition = "none"
+      wheelRef.current.style.transform  = "rotate(0deg)"
+    }
+  }
+
+  return (
+    <div className="min-h-[88vh] felt-bg flex flex-col items-center py-4 px-2 sm:px-4">
+
+      {/* Header */}
+      <div className="flex items-center justify-between w-full max-w-2xl mb-3">
+        <button onClick={() => navigate("/games")} className="text-casino-text-secondary hover:text-casino-gold text-sm transition-colors">
+          ← Back
+        </button>
+        <h1 className="text-2xl font-bold gold-text">Roulette</h1>
+        <div className="text-right text-sm">
+          <div className="text-casino-muted text-xs">Balance</div>
+          <div className="font-bold text-casino-text">
+            ₹{Number(profile?.walletbalance ?? 0).toLocaleString("en-IN")}
+          </div>
+        </div>
+      </div>
+
+      {error && (
+        <div className="mb-4 px-4 py-2 bg-casino-danger/20 border border-casino-danger/40 rounded-lg text-casino-danger text-sm">
+          {error}
+        </div>
+      )}
+
+      {/* Premium Wheel */}
+      <div className="relative w-64 h-64 sm:w-72 sm:h-72 mb-5 sm:mb-8 shadow-[0_20px_50px_rgba(0,0,0,0.8)] rounded-full perspective-[1000px]">
+        {/* Outer wood/gold bezel */}
+        <div className="absolute inset-[-16px] rounded-full border-[10px] border-[#4a2406] bg-[#3a1d04] shadow-[inset_0_0_30px_rgba(0,0,0,1),0_10px_20px_rgba(0,0,0,0.5)]">
+          <div className="absolute inset-0 rounded-full border-[2px] border-yellow-600/50"></div>
+        </div>
+
+        {/* The Spinner */}
+        <div
+          ref={wheelRef}
+          className="relative w-full h-full rounded-full overflow-hidden bg-black shadow-[inset_0_0_40px_rgba(0,0,0,1)]"
+        >
+          {WHEEL.map((n, i) => {
+            const angle = (i / 37) * 360;
+            return (
+              <div
+                key={n}
+                className="absolute top-0 left-1/2 origin-bottom flex justify-center pt-1.5 sm:pt-2 shadow-[inset_0_0_10px_rgba(0,0,0,0.5)] box-border"
+                style={{
+                  width: '8.8%', 
+                  marginLeft: '-4.4%',
+                  height: '50%',
+                  transform: `rotate(${angle}deg)`,
+                  backgroundColor: n === 0 ? '#166534' : RED_NUMS.has(n) ? '#B91C1C' : '#111827',
+                  borderRight: '1px solid rgba(255,255,255,0.15)',
+                  borderLeft: '1px solid rgba(0,0,0,0.3)'
+                }}
+              >
+                <span className="text-[10px] sm:text-[12px] font-black text-white/90 drop-shadow-md">{n}</span>
+              </div>
+            )
+          })}
+          
+          {/* Inner metallic dome */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[45%] h-[45%] rounded-full border-[6px] border-yellow-700/90 shadow-[0_0_30px_rgba(0,0,0,0.9),inset_0_0_15px_rgba(255,255,255,0.4)] bg-gradient-to-tr from-gray-800 via-gray-300 to-gray-900 z-10 flex items-center justify-center">
+            {/* Spinning decorative spokes */}
+            <div className="w-1/2 h-1/2 rounded-full border-[3px] border-yellow-600/70 flex items-center justify-center rotate-45 shadow-[inset_0_0_5px_rgba(0,0,0,0.5)]">
+              <div className="w-1 h-full bg-yellow-600/60 rounded-full"></div>
+              <div className="w-full h-1 bg-yellow-600/60 absolute rounded-full"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* The pointer at the top */}
+        <div className="absolute -top-7 left-1/2 -translate-x-1/2 z-20 drop-shadow-xl">
+          <div className="w-7 h-9 bg-gradient-to-b from-yellow-200 to-yellow-600 border border-yellow-100" style={{ clipPath: 'polygon(50% 100%, 0 0, 100% 0)' }}></div>
+        </div>
+
+        {/* Center Display Badge */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none">
+          <div className="w-16 h-16 rounded-full bg-black/90 border border-yellow-500/50 shadow-[0_0_20px_rgba(234,179,8,0.4)] flex items-center justify-center backdrop-blur-md">
+            {landed !== null
+              ? <span className={`text-2xl font-black filter drop-shadow-[0_0_8px_rgba(255,255,255,0.3)] ${numTextColor(landed)}`}>{landed}</span>
+              : <span className="text-casino-muted text-sm font-bold">{spinning ? "..." : "?"}</span>
+            }
+          </div>
+        </div>
+      </div>
+
+      {/* Result banner */}
+      {result && (
+        <div className={`mb-2 py-2 px-6 rounded-2xl font-bold text-base animate-fade-in text-center ${
+          result.outcome === "win"
+            ? "bg-casino-success/20 text-green-400 border border-green-600/40"
+            : "bg-casino-danger/20  text-red-400   border border-red-600/40"
+        }`}>
+          {result.message}
+          {result.outcome === "win" && (
+            <div className="text-sm font-normal mt-1">+₹{Number(result.payout).toLocaleString("en-IN")}</div>
+          )}
+        </div>
+      )}
+
+      {/* Bet type buttons */}
+      <div className="grid grid-cols-3 gap-2 w-full max-w-sm mb-3">
+        {BET_TYPES.map(b => (
+          <button
+            key={b.key}
+            onClick={() => setBetType(b.key)}
+            disabled={spinning}
+            className={`py-2 rounded-lg text-sm font-medium transition-all ${
+              betType === b.key
+                ? b.key === "red"   ? "bg-red-600  text-white"
+                : b.key === "black" ? "bg-gray-900 text-white border border-white/20"
+                :                    "bg-gold-gradient text-casino-black"
+                : "border border-casino-border text-casino-text-secondary hover:border-casino-gold/50"
+            }`}
+          >
+            {b.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Chips & Custom Bet */}
+      <div className="flex flex-col items-center gap-2 mb-2">
+        <div className="flex gap-2 flex-wrap justify-center">
+          {CHIPS.map(c => (
+            <button
+              key={c}
+              onClick={() => setBetAmount(c)}
+              disabled={spinning}
+              className={`chip text-xs ${betAmount === c
+                ? "bg-casino-gold text-casino-black border-casino-gold shadow-gold"
+                : "bg-casino-card text-casino-text border-casino-border"
+              }`}
+            >
+              {c >= 1000 ? `${c/1000}k` : c}
+            </button>
+          ))}
+        </div>
+          
+        <div className="flex items-center gap-3 bg-black/40 px-4 py-2 rounded-xl border border-white/10 shadow-inner">
+          <span className="text-[11px] text-casino-text-secondary uppercase tracking-widest font-bold">Custom</span>
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-casino-gold font-bold">₹</span>
+            <input 
+              type="number" 
+              disabled={spinning}
+              className="bg-black/60 border border-white/20 rounded-lg pl-8 pr-3 py-1.5 text-white w-28 font-bold outline-none focus:border-casino-gold hover:border-white/40 transition-colors disabled:opacity-50"
+              value={betAmount === 0 ? "" : betAmount}
+              onChange={(e) => setBetAmount(e.target.value)}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Spin / reset */}
+      <div className="flex gap-3 justify-center mt-3">
+        {!result
+          ? <Button variant="gold" size="lg" onClick={spin} loading={spinning} disabled={!betType}>
+              {spinning ? "Spinning…" : "Spin"}
+            </Button>
+          : <Button variant="gold" size="lg" onClick={reset}>Spin Again</Button>
+        }
+      </div>
+
+      {betType && !spinning && !result && (
+        <p className="mt-3 text-casino-muted text-xs text-center">
+          Betting ₹{betAmount.toLocaleString("en-IN")} on <strong className="text-casino-text">{betType}</strong> · 2× payout
+        </p>
+      )}
+    </div>
+  )
+}

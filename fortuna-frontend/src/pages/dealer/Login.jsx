@@ -1,0 +1,1 @@
+export { DealerLogin as default } from "../player/Login"
