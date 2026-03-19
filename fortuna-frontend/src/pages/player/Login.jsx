@@ -3,11 +3,10 @@ import { useNavigate, Link } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext"
 import { Button, Input, Card, GoldDivider } from "../../components/ui/index"
 
-// ── Shared form used by all three roles ───────────────────────
 function LoginForm({ title, subtitle, icon, loginFn, redirectTo, registerLink }) {
   const navigate = useNavigate()
-  const [form,    setForm]    = useState({ email: "", password: "" })
-  const [error,   setError]   = useState("")
+  const [form, setForm] = useState({ email: "", password: "" })
+  const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e) => {
@@ -84,7 +83,6 @@ function LoginForm({ title, subtitle, icon, loginFn, redirectTo, registerLink })
   )
 }
 
-// ── Player login (default export) ─────────────────────────────
 export default function PlayerLogin() {
   const { playerLogin } = useAuth()
   return (
@@ -99,7 +97,6 @@ export default function PlayerLogin() {
   )
 }
 
-// ── Dealer login ──────────────────────────────────────────────
 export function DealerLogin() {
   const { dealerLogin } = useAuth()
   return (
@@ -113,7 +110,6 @@ export function DealerLogin() {
   )
 }
 
-// ── Admin login ───────────────────────────────────────────────
 export function AdminLogin() {
   const { adminLogin } = useAuth()
   return (

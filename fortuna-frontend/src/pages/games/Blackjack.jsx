@@ -3,10 +3,10 @@ import { useNavigate } from "react-router-dom"
 import { gameAPI, playerAPI } from "../../api/axios"
 import { Button, Card } from "../../components/ui/index"
 
-// ── Deck helpers ──────────────────────────────────────────────
-const SUITS  = ["♠","♥","♦","♣"]
-const VALUES = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"]
-const RED    = new Set(["♥","♦"])
+
+const SUITS = ["♠", "♥", "♦", "♣"]
+const VALUES = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
+const RED = new Set(["♥", "♦"])
 
 function buildDeck() {
   const deck = []
@@ -21,14 +21,14 @@ function buildDeck() {
 }
 
 function cardValue(card) {
-  if (["J","Q","K"].includes(card.val)) return 10
+  if (["J", "Q", "K"].includes(card.val)) return 10
   if (card.val === "A") return 11
   return parseInt(card.val)
 }
 
 function handTotal(hand) {
   let total = hand.reduce((s, c) => s + cardValue(c), 0)
-  let aces  = hand.filter(c => c.val === "A").length
+  let aces = hand.filter(c => c.val === "A").length
   while (total > 21 && aces > 0) { total -= 10; aces-- }
   return total
 }
@@ -64,23 +64,22 @@ function Hand({ cards, label, total, hideSecond = false, delayBase = 0 }) {
   )
 }
 
-// ── Main ──────────────────────────────────────────────────────
 const STATES = { IDLE: "idle", PLAYING: "playing", DONE: "done" }
-const CHIPS  = [50, 100, 500, 1000]
+const CHIPS = [50, 100, 500, 1000]
 
 export default function Blackjack() {
   const navigate = useNavigate()
-  const [gameInfo,  setGameInfo]  = useState(null)
-  const [session,   setSession]   = useState(null)
-  const [profile,   setProfile]   = useState(null)
-  const [deck,      setDeck]      = useState([])
-  const [player,    setPlayer]    = useState([])
-  const [dealer,    setDealer]    = useState([])
+  const [gameInfo, setGameInfo] = useState(null)
+  const [session, setSession] = useState(null)
+  const [profile, setProfile] = useState(null)
+  const [deck, setDeck] = useState([])
+  const [player, setPlayer] = useState([])
+  const [dealer, setDealer] = useState([])
   const [betAmount, setBetAmount] = useState(100)
   const [gameState, setGameState] = useState(STATES.IDLE)
-  const [result,    setResult]    = useState(null)
-  const [loading,   setLoading]   = useState(false)
-  const [error,     setError]     = useState("")
+  const [result, setResult] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
 
   useEffect(() => {
     gameAPI.listGames().then(r => setGameInfo(r.data.find(g => g.gamename === "Blackjack")))
@@ -89,7 +88,7 @@ export default function Blackjack() {
 
   const refreshProfile = () => playerAPI.getProfile().then(r => setProfile(r.data))
 
-  const startGame = useCallback(async () => {
+  const startGame = async () => {
     if (!gameInfo) return
     const amt = Number(betAmount)
     if (isNaN(amt) || amt <= 0) {
@@ -106,20 +105,20 @@ export default function Blackjack() {
     }
     setError(""); setLoading(true)
     try {
-      const res  = await gameAPI.startSession(gameInfo.gameid)
+      const res = await gameAPI.startSession(gameInfo.gameid)
       setSession(res.data)
-      const d    = buildDeck()
-      const p    = [d.pop(), d.pop()]
-      const dlr  = [d.pop(), d.pop()]
+      const d = buildDeck()
+      const p = [d.pop(), d.pop()]
+      const dlr = [d.pop(), d.pop()]
       setDeck(d); setPlayer(p); setDealer(dlr)
       setResult(null); setGameState(STATES.PLAYING)
     } catch (e) {
       setError(e.response?.data?.error || "Could not start game")
     } finally { setLoading(false) }
-  }, [gameInfo])
+  }
 
   const hit = () => {
-    const d    = [...deck]
+    const d = [...deck]
     const card = d.pop()
     const hand = [...player, card]
     setDeck(d); setPlayer(hand)
@@ -127,24 +126,24 @@ export default function Blackjack() {
   }
 
   const stand = () => {
-    let d   = [...dealer]
-    let dk  = [...deck]
+    let d = [...dealer]
+    let dk = [...deck]
     while (handTotal(d) < 17) d.push(dk.pop())
     setDealer(d); setDeck(dk)
     finishGame(player, d, false)
   }
 
   const finishGame = async (pHand, dHand, busted) => {
-    const pt  = handTotal(pHand)
-    const dt  = handTotal(dHand)
+    const pt = handTotal(pHand)
+    const dt = handTotal(dHand)
     const bet = Number(betAmount)
     let outcome, payout, message
 
-    if (busted || pt > 21)   { outcome="loss"; payout=0;       message="Bust! Over 21."         }
-    else if (dt > 21)        { outcome="win";  payout=bet*2;   message="Dealer busts! You win!" }
-    else if (pt > dt)        { outcome="win";  payout=bet*2;   message="You win!"               }
-    else if (pt < dt)        { outcome="loss"; payout=0;       message="Dealer wins."           }
-    else                     { outcome="draw"; payout=bet;     message="Push — it's a tie."     }
+    if (busted || pt > 21) { outcome = "loss"; payout = 0; message = "Bust! Over 21." }
+    else if (dt > 21) { outcome = "win"; payout = bet * 2; message = "Dealer busts! You win!" }
+    else if (pt > dt) { outcome = "win"; payout = bet * 2; message = "You win!" }
+    else if (pt < dt) { outcome = "loss"; payout = 0; message = "Dealer wins." }
+    else { outcome = "draw"; payout = bet; message = "Push — it's a tie." }
 
     setResult({ outcome, payout, message })
     setGameState(STATES.DONE)
@@ -205,11 +204,10 @@ export default function Blackjack() {
         {/* Center / Message Area */}
         <div className="w-full min-h-[4rem] flex justify-center items-center z-20 relative">
           {result ? (
-            <div className={`text-center py-2 px-6 sm:py-3 sm:px-8 rounded-2xl font-bold text-base sm:text-lg animate-fade-in shadow-2xl relative z-30 ${
-              result.outcome === "win"  ? "bg-green-900 text-white border-2 border-green-500" :
-              result.outcome === "loss" ? "bg-red-900 text-white border-2 border-red-500"   :
-                                          "bg-yellow-900 text-white border-2 border-yellow-500"
-            }`}>
+            <div className={`text-center py-2 px-6 sm:py-3 sm:px-8 rounded-2xl font-bold text-base sm:text-lg animate-fade-in shadow-2xl relative z-30 ${result.outcome === "win" ? "bg-green-900 text-white border-2 border-green-500" :
+                result.outcome === "loss" ? "bg-red-900 text-white border-2 border-red-500" :
+                  "bg-yellow-900 text-white border-2 border-yellow-500"
+              }`}>
               {result.message}
               {result.outcome === "win" && (
                 <div className="text-sm font-normal mt-1">+₹{Number(result.payout).toLocaleString("en-IN")}</div>
@@ -230,7 +228,7 @@ export default function Blackjack() {
 
       {/* Controls Dashboard */}
       <div className="w-full max-w-2xl bg-black/40 rounded-3xl border border-white/10 p-4 sm:p-5 flex flex-col gap-4 shadow-2xl relative z-20 mt-3 sm:mt-4">
-        
+
         {(gameState === STATES.IDLE || gameState === STATES.DONE) && (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-black/50 p-3 sm:p-4 rounded-2xl border border-white/5 shadow-inner">
             <div className="flex gap-2 flex-wrap justify-center sm:justify-start">
@@ -241,17 +239,17 @@ export default function Blackjack() {
                   className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full font-black text-xs sm:text-sm border-[3px] shadow-lg transition-transform active:scale-95 ${betAmount === c
                     ? "bg-gradient-to-br from-yellow-300 to-yellow-600 text-casino-black border-yellow-200 scale-110"
                     : "bg-gradient-to-br from-gray-800 to-black text-white border-gray-600 hover:border-gray-400"
-                  }`}
+                    }`}
                 >
-                  {c >= 1000 ? `${c/1000}k` : c}
+                  {c >= 1000 ? `${c / 1000}k` : c}
                 </button>
               ))}
             </div>
-            
+
             <div className="relative w-full sm:w-32 shrink-0">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-casino-gold font-bold text-lg">₹</span>
-              <input 
-                type="number" 
+              <input
+                type="number"
                 className="bg-black/80 border-2 border-white/20 rounded-xl pl-9 pr-2 py-2.5 text-white w-full font-bold outline-none focus:border-casino-gold hover:border-white/40 transition-colors text-sm text-center shadow-inner"
                 value={betAmount === 0 ? "" : betAmount}
                 onChange={(e) => setBetAmount(e.target.value)}

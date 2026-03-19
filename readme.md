@@ -41,6 +41,7 @@ Make sure you have the following installed:
 
 1. Open your PostgreSQL terminal or pgAdmin.
 2. Create a new database for the project:
+
    ```sql
    CREATE DATABASE fortuna;
    ```

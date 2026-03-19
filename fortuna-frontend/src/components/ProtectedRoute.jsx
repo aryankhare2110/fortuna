@@ -9,7 +9,6 @@ export default function ProtectedRoute({ children, allowedRole }) {
   }
 
   if (allowedRole && role !== allowedRole) {
-    // If authenticated but wrong role, send them home
     return <Navigate to="/" replace />
   }
 

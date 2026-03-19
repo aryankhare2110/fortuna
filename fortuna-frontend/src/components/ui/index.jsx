@@ -1,4 +1,3 @@
-// ── Button ────────────────────────────────────────────────────
 export function Button({
   children, onClick, type = "button",
   variant = "gold", size = "md",
@@ -7,10 +6,10 @@ export function Button({
   const base = "inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
 
   const variants = {
-    gold:    "bg-gold-gradient text-casino-black hover:shadow-gold-lg",
+    gold: "bg-gold-gradient text-casino-black hover:shadow-gold-lg",
     outline: "border border-casino-gold text-casino-gold hover:bg-casino-gold/10",
-    ghost:   "text-casino-text-secondary hover:text-casino-text hover:bg-white/5",
-    danger:  "bg-casino-danger text-white hover:bg-red-600",
+    ghost: "text-casino-text-secondary hover:text-casino-text hover:bg-white/5",
+    danger: "bg-casino-danger text-white hover:bg-red-600",
     success: "bg-casino-success text-white hover:bg-green-600",
   }
 
@@ -31,8 +30,8 @@ export function Button({
         <span className="flex items-center gap-2">
           <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
             <circle className="opacity-25" cx="12" cy="12" r="10"
-              stroke="currentColor" strokeWidth="4"/>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+              stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
           </svg>
           Loading…
         </span>
@@ -41,7 +40,6 @@ export function Button({
   )
 }
 
-// ── Card ──────────────────────────────────────────────────────
 export function Card({ children, className = "", glow = false }) {
   return (
     <div className={`
@@ -54,7 +52,6 @@ export function Card({ children, className = "", glow = false }) {
   )
 }
 
-// ── Input ─────────────────────────────────────────────────────
 export function Input({ label, id, error, className = "", ...props }) {
   return (
     <div className="flex flex-col gap-1.5">
@@ -82,7 +79,6 @@ export function Input({ label, id, error, className = "", ...props }) {
   )
 }
 
-// ── StatCard ──────────────────────────────────────────────────
 export function StatCard({ label, value, sub, icon }) {
   return (
     <div className="stat-card">
@@ -98,13 +94,12 @@ export function StatCard({ label, value, sub, icon }) {
   )
 }
 
-// ── Badge ─────────────────────────────────────────────────────
 export function Badge({ children, variant = "default" }) {
   const variants = {
     default: "bg-casino-border  text-casino-text-secondary",
-    gold:    "bg-casino-gold/20 text-casino-gold",
+    gold: "bg-casino-gold/20 text-casino-gold",
     success: "bg-green-900/40   text-green-400",
-    danger:  "bg-red-900/40     text-red-400",
+    danger: "bg-red-900/40     text-red-400",
     warning: "bg-yellow-900/40  text-yellow-400",
   }
   return (
@@ -114,7 +109,6 @@ export function Badge({ children, variant = "default" }) {
   )
 }
 
-// ── GoldDivider ───────────────────────────────────────────────
 export function GoldDivider() {
   return (
     <div className="w-full h-px bg-gradient-to-r from-transparent via-casino-gold/40 to-transparent my-4" />

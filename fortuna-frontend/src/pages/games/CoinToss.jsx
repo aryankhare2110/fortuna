@@ -8,15 +8,15 @@ const CHIPS = [10, 50, 100, 500]
 export default function CoinToss() {
   const navigate = useNavigate()
 
-  const [gameInfo,  setGameInfo]  = useState(null)
-  const [profile,   setProfile]   = useState(null)
-  const [choice,    setChoice]    = useState(null)   // "heads" | "tails"
+  const [gameInfo, setGameInfo] = useState(null)
+  const [profile, setProfile] = useState(null)
+  const [choice, setChoice] = useState(null)
   const [betAmount, setBetAmount] = useState(100)
-  const [flipping,  setFlipping]  = useState(false)
-  const [landed,    setLanded]    = useState(null)
-  const [result,    setResult]    = useState(null)
+  const [flipping, setFlipping] = useState(false)
+  const [landed, setLanded] = useState(null)
+  const [result, setResult] = useState(null)
   const [flipClass, setFlipClass] = useState("")
-  const [error,     setError]     = useState("")
+  const [error, setError] = useState("")
 
   useEffect(() => {
     gameAPI.listGames().then(r => setGameInfo(r.data.find(g => g.gamename === "Coin Toss")))
@@ -24,7 +24,7 @@ export default function CoinToss() {
   }, [])
 
   const toss = async () => {
-    if (!choice)   { setError("Pick Heads or Tails first"); return }
+    if (!choice) { setError("Pick Heads or Tails first"); return }
     if (!gameInfo) return
     const amt = Number(betAmount)
     if (isNaN(amt) || amt <= 0) {
@@ -41,7 +41,6 @@ export default function CoinToss() {
     }
     setError(""); setFlipping(true); setLanded(null); setResult(null)
 
-    // Flip animation loop
     for (let i = 0; i < 5; i++) {
       setFlipClass("animate-flip")
       await new Promise(r => setTimeout(r, 400))
@@ -50,8 +49,8 @@ export default function CoinToss() {
     }
 
     const outcome = Math.random() < 0.5 ? "heads" : "tails"
-    const won     = outcome === choice
-    const payout  = won ? Number(betAmount) * 2 : 0
+    const won = outcome === choice
+    const payout = won ? Number(betAmount) * 2 : 0
 
     setLanded(outcome)
     setFlipClass("")
@@ -61,8 +60,8 @@ export default function CoinToss() {
       const sess = await gameAPI.startSession(gameInfo.gameid)
       await gameAPI.placeBet({
         session_id: sess.data.sessionid,
-        amount:     Number(betAmount),
-        result:     won ? "win" : "loss",
+        amount: Number(betAmount),
+        result: won ? "win" : "loss",
         payout,
       })
       await gameAPI.endSession(sess.data.sessionid, won ? "player_win" : "dealer_win")
@@ -82,11 +81,10 @@ export default function CoinToss() {
     setLanded(null); setResult(null); setChoice(null); setError("")
   }
 
-  // Coin face
   const coinFace = flipping ? "🪙"
     : landed === "heads" ? "👑"
-    : landed === "tails" ? "★"
-    : "🪙"
+      : landed === "tails" ? "★"
+        : "🪙"
 
   return (
     <div className="min-h-[88vh] felt-bg flex flex-col items-center py-8 px-4">
@@ -114,7 +112,7 @@ export default function CoinToss() {
       {/* Premium Coin */}
       <div className="relative mb-12" style={{ perspective: '1000px' }}>
         <div className={`w-40 h-40 relative rounded-full ${flipClass}`} style={{ transformStyle: 'preserve-3d' }}>
-          
+
           {/* Coin Body (Thickness + Gradients) */}
           <div className="absolute inset-0 rounded-full border-8 border-yellow-400/90 shadow-[0_15px_35px_rgba(234,179,8,0.5),inset_0_0_20px_rgba(161,98,7,0.8)] bg-gradient-to-br from-yellow-200 via-yellow-500 to-yellow-800 flex items-center justify-center">
             {/* Inner Etched Ring */}
@@ -127,7 +125,7 @@ export default function CoinToss() {
           </div>
 
         </div>
-        
+
         {landed && (
           <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-sm font-black gold-text uppercase tracking-widest whitespace-nowrap animate-fade-in bg-black/60 px-4 py-1.5 rounded-full border border-yellow-500/30">
             {landed}
@@ -137,11 +135,10 @@ export default function CoinToss() {
 
       {/* Result banner */}
       {result && (
-        <div className={`mb-4 py-3 px-8 rounded-2xl font-bold text-lg shadow-2xl animate-fade-in text-center z-10 relative ${
-          result.outcome === "win"
+        <div className={`mb-4 py-3 px-8 rounded-2xl font-bold text-lg shadow-2xl animate-fade-in text-center z-10 relative ${result.outcome === "win"
             ? "bg-green-900 text-white border-2 border-green-500"
             : "bg-red-900   text-white border-2 border-red-500"
-        }`}>
+          }`}>
           {result.message}
           {result.outcome === "win" && (
             <div className="text-sm font-normal mt-1">+₹{Number(result.payout).toLocaleString("en-IN")}</div>
@@ -151,19 +148,18 @@ export default function CoinToss() {
 
       {/* Betting Controls Dashboard */}
       <div className="w-full max-w-md bg-black/40 rounded-3xl border border-white/10 p-4 sm:p-5 flex flex-col gap-5 shadow-2xl relative z-20 mt-2">
-        
+
         {!result && (
           <div className="grid grid-cols-2 gap-3 w-full">
-            {["heads","tails"].map(side => (
+            {["heads", "tails"].map(side => (
               <button
                 key={side}
                 onClick={() => setChoice(side)}
                 disabled={flipping}
-                className={`py-3 rounded-xl font-bold tracking-wide capitalize transition-all shadow-md ${
-                  choice === side
+                className={`py-3 rounded-xl font-bold tracking-wide capitalize transition-all shadow-md ${choice === side
                     ? "bg-gold-gradient text-casino-black border-2 border-yellow-300 scale-[1.02]"
                     : "bg-black/40 border-2 border-white/20 text-casino-text-secondary hover:border-white/50 hover:text-white hover:bg-white/5"
-                }`}
+                  }`}
               >
                 {side === "heads" ? "👑 Heads" : "★ Tails"}
               </button>
@@ -173,7 +169,7 @@ export default function CoinToss() {
 
         {!result && (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-black/50 p-3 sm:p-4 rounded-2xl border border-white/5 shadow-inner">
-            
+
             <div className="flex gap-2 flex-wrap justify-center sm:justify-start">
               {CHIPS.map(c => (
                 <button
@@ -183,24 +179,24 @@ export default function CoinToss() {
                   className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full font-black text-xs sm:text-sm border-[3px] shadow-lg transition-transform active:scale-95 ${betAmount === c
                     ? "bg-gradient-to-br from-yellow-300 to-yellow-600 text-casino-black border-yellow-200 scale-110"
                     : "bg-gradient-to-br from-gray-800 to-black text-white border-gray-600 hover:border-gray-400"
-                  }`}
+                    }`}
                 >
-                  {c >= 1000 ? `${c/1000}k` : c}
+                  {c >= 1000 ? `${c / 1000}k` : c}
                 </button>
               ))}
             </div>
-              
+
             <div className="relative w-full sm:w-32 shrink-0">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-casino-gold font-bold text-lg">₹</span>
-              <input 
-                type="number" 
+              <input
+                type="number"
                 disabled={flipping}
                 className="bg-black/80 border-2 border-white/20 rounded-xl pl-9 pr-2 py-2.5 text-white w-full font-bold outline-none focus:border-casino-gold hover:border-white/40 transition-colors text-sm disabled:opacity-50 text-center shadow-inner"
                 value={betAmount === 0 ? "" : betAmount}
                 onChange={(e) => setBetAmount(e.target.value)}
               />
             </div>
-            
+
           </div>
         )}
 
@@ -208,8 +204,8 @@ export default function CoinToss() {
         <div className="mt-1">
           {!result
             ? <Button variant="gold" className="w-full py-4 text-lg tracking-widest uppercase font-black shadow-xl" onClick={toss} loading={flipping} disabled={!choice}>
-                {flipping ? "Flipping…" : `Toss — ₹${Number(betAmount).toLocaleString("en-IN")}`}
-              </Button>
+              {flipping ? "Flipping…" : `Toss — ₹${Number(betAmount).toLocaleString("en-IN")}`}
+            </Button>
             : <Button variant="gold" className="w-full py-4 text-lg tracking-widest uppercase font-black shadow-xl" onClick={reset}>Toss Again</Button>
           }
         </div>
