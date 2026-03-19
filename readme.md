@@ -1,17 +1,11 @@
-<div align="center">
-
-# FORTUNA CASINO
-**A Premium Full-Stack Casino Management System**
-
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](#)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](#)
 [![Python](https://img.shields.io/badge/Python-14354C?style=for-the-badge&logo=python&logoColor=white)](#)
 [![Flask](https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white)](#)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](#)
 
-*Experience the thrill of the house, engineered from the ground up.*
-
-</div>
+# FORTUNA CASINO
+**A Full-Stack Casino Management System**
 
 ## Overview
 
