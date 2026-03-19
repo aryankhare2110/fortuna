@@ -97,7 +97,7 @@ export default function Roulette() {
   }
 
   return (
-    <div className="min-h-[88vh] felt-bg flex flex-col items-center py-4 px-2 sm:px-4">
+    <div className="min-h-[88vh] felt-bg flex flex-col items-center py-2 px-2 sm:px-4">
 
       {/* Header */}
       <div className="flex items-center justify-between w-full max-w-2xl mb-3">
@@ -120,7 +120,7 @@ export default function Roulette() {
       )}
 
       {/* Premium Wheel */}
-      <div className="relative w-56 h-56 sm:w-64 sm:h-64 mt-4 sm:mt-6 mb-4 sm:mb-6 shadow-[0_20px_50px_rgba(0,0,0,0.8)] rounded-full perspective-[1000px]">
+      <div className="relative w-48 h-48 sm:w-56 sm:h-56 mt-8 mb-10 sm:mt-10 sm:mb-12 shadow-[0_20px_50px_rgba(0,0,0,0.8)] rounded-full perspective-[1000px]">
         {/* Outer wood/gold bezel */}
         <div className="absolute inset-[-16px] rounded-full border-[10px] border-[#4a2406] bg-[#3a1d04] shadow-[inset_0_0_30px_rgba(0,0,0,1),0_10px_20px_rgba(0,0,0,0.5)]">
           <div className="absolute inset-0 rounded-full border-[2px] border-yellow-600/50"></div>
@@ -192,67 +192,71 @@ export default function Roulette() {
         </div>
       )}
 
-      {/* Bet type buttons */}
-      <div className="grid grid-cols-3 gap-2 w-full max-w-sm mb-3">
-        {BET_TYPES.map(b => (
-          <button
-            key={b.key}
-            onClick={() => setBetType(b.key)}
-            disabled={spinning}
-            className={`py-2 rounded-lg text-sm font-medium transition-all ${
-              betType === b.key
-                ? b.key === "red"   ? "bg-red-600  text-white"
-                : b.key === "black" ? "bg-gray-900 text-white border border-white/20"
-                :                    "bg-gold-gradient text-casino-black"
-                : "border border-casino-border text-casino-text-secondary hover:border-casino-gold/50"
-            }`}
-          >
-            {b.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Chips & Custom Bet */}
-      <div className="flex flex-col items-center gap-2 mb-2">
-        <div className="flex gap-2 flex-wrap justify-center">
-          {CHIPS.map(c => (
+      {/* Betting Controls Dashboard */}
+      <div className="w-full max-w-md bg-black/40 rounded-3xl border border-white/10 p-4 sm:p-5 flex flex-col gap-5 shadow-2xl relative z-20">
+        
+        {/* Bet Types Grid */}
+        <div className="grid grid-cols-3 gap-2 sm:gap-3 w-full">
+          {BET_TYPES.map(b => (
             <button
-              key={c}
-              onClick={() => setBetAmount(c)}
+              key={b.key}
+              onClick={() => setBetType(b.key)}
               disabled={spinning}
-              className={`chip text-xs ${betAmount === c
-                ? "bg-casino-gold text-casino-black border-casino-gold shadow-gold"
-                : "bg-casino-card text-casino-text border-casino-border"
+              className={`py-2.5 rounded-xl text-sm font-bold tracking-wide transition-all shadow-md ${
+                betType === b.key
+                  ? b.key === "red"   ? "bg-red-600  text-white border-2 border-red-400"
+                  : b.key === "black" ? "bg-gray-900 text-white border-2 border-white/40"
+                  :                    "bg-gold-gradient text-casino-black border-2 border-yellow-300"
+                  : "bg-black/40 border-2 border-white/20 text-casino-text-secondary hover:border-white/50 hover:text-white hover:bg-white/5"
               }`}
             >
-              {c >= 1000 ? `${c/1000}k` : c}
+              {b.label}
             </button>
           ))}
         </div>
+
+        {/* Chips & Input Panel */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-black/50 p-3 sm:p-4 rounded-2xl border border-white/5 shadow-inner">
           
-        <div className="flex items-center gap-3 bg-black/40 px-4 py-2 rounded-xl border border-white/10 shadow-inner">
-          <span className="text-[11px] text-casino-text-secondary uppercase tracking-widest font-bold">Custom</span>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-casino-gold font-bold">₹</span>
+          <div className="flex gap-2 flex-wrap justify-center sm:justify-start">
+            {CHIPS.map(c => (
+              <button
+                key={c}
+                onClick={() => setBetAmount(c)}
+                disabled={spinning}
+                className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full font-black text-xs sm:text-sm border-[3px] shadow-lg transition-transform active:scale-95 ${betAmount === c
+                  ? "bg-gradient-to-br from-yellow-300 to-yellow-600 text-casino-black border-yellow-200 scale-110"
+                  : "bg-gradient-to-br from-gray-800 to-black text-white border-gray-600 hover:border-gray-400"
+                }`}
+              >
+                {c >= 1000 ? `${c/1000}k` : c}
+              </button>
+            ))}
+          </div>
+            
+          <div className="relative w-full sm:w-32 shrink-0">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-casino-gold font-bold text-lg">₹</span>
             <input 
               type="number" 
               disabled={spinning}
-              className="bg-black/60 border border-white/20 rounded-lg pl-8 pr-3 py-1.5 text-white w-28 font-bold outline-none focus:border-casino-gold hover:border-white/40 transition-colors disabled:opacity-50"
+              className="bg-black/80 border-2 border-white/20 rounded-xl pl-9 pr-2 py-2.5 text-white w-full font-bold outline-none focus:border-casino-gold hover:border-white/40 transition-colors text-sm disabled:opacity-50 text-center shadow-inner"
               value={betAmount === 0 ? "" : betAmount}
               onChange={(e) => setBetAmount(e.target.value)}
             />
           </div>
-        </div>
-      </div>
 
-      {/* Spin / reset */}
-      <div className="flex gap-3 justify-center mt-3">
-        {!result
-          ? <Button variant="gold" size="lg" onClick={spin} loading={spinning} disabled={!betType}>
-              {spinning ? "Spinning…" : "Spin"}
-            </Button>
-          : <Button variant="gold" size="lg" onClick={reset}>Spin Again</Button>
-        }
+        </div>
+
+        {/* Action Button */}
+        <div className="mt-1">
+          {!result
+            ? <Button variant="gold" className="w-full py-4 text-lg tracking-widest uppercase font-black shadow-xl" onClick={spin} loading={spinning} disabled={!betType}>
+                {spinning ? "Spinning…" : `Spin — ₹${Number(betAmount).toLocaleString("en-IN")}`}
+              </Button>
+            : <Button variant="gold" className="w-full py-4 text-lg tracking-widest uppercase font-black shadow-xl" onClick={reset}>Spin Again</Button>
+          }
+        </div>
+
       </div>
 
       {betType && !spinning && !result && (
