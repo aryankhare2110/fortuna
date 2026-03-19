@@ -1,6 +1,6 @@
 <div align="center">
 
-# ♠️ ♥️ FORTUNA CASINO ♦️ ♣️
+# FORTUNA CASINO
 **A Premium Full-Stack Casino Management System**
 
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](#)
@@ -13,37 +13,37 @@
 
 </div>
 
-## 🎯 Overview
+## Overview
 
 Fortuna is a highly scalable, role-based Casino platform designed with a premium, physics-inspired UI and a robust relational database backend. 
 
 The application partitions the ecosystem into three distinct user roles, ensuring secure and segregated access to game logic, wallet management, and administrative configurations.
 
-### 🌟 Key Features
+### Key Features
 
-#### 🎰 Interactive Games
+#### Interactive Games
 - **Roulette:** Physics-driven SVG roulette wheel with complex multi-betting capabilities (Red/Black, Odd/Even, Numbers).
 - **Blackjack:** Card simulation against the Dealer with dynamic Hit/Stand logic and push mechanics.
 - **Coin Toss:** Flipping mechanics with instant 2x multipliers.
 
-#### 👥 Three-Tier Ecosystem
+#### Three-Tier Ecosystem
 1. **Player Dashboard:** Access wallet (deposits & withdrawals), redeem reward points for cash, and jump into live game lobbies. Features transaction histories and personal betting analytics.
 2. **Dealer Dashboard:** Manage live game sessions and analyze active player metrics. Features an automated "Suspicious Activity" flagger to detect card counting or high-risk behaviors.
 3. **Admin Dashboard:** Control global operations. Instantly tweak dynamic Minimum and Maximum Table Limits, ban or unban players from the platform, and monitor total Gross Revenue and House Edge metrics.
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 Follow these instructions to run the Fortuna ecosystem locally on your machine.
 
-### 📋 Prerequisites
+### Prerequisites
 Make sure you have the following installed:
 * [Node.js](https://nodejs.org/) (v16+)
 * [Python](https://www.python.org/downloads/) (v3.10+)
 * [PostgreSQL](https://www.postgresql.org/download/)
 
-### 💾 1. Database Setup
+### 1. Database Setup
 
 1. Open your PostgreSQL terminal or pgAdmin.
 2. Create a new database for the project:
@@ -54,7 +54,7 @@ Make sure you have the following installed:
    * First: `database/schema.sql` (Builds tables, views, and functions)
    * Second: `database/seed.sql` (Populates dummy accounts and test data)
 
-### ⚙️ 2. Backend Setup (Python / Flask)
+### 2. Backend Setup (Python / Flask)
 
 The backend powers the REST API and database connectivity.
 
@@ -93,7 +93,7 @@ The backend powers the REST API and database connectivity.
    ```
    *The backend should now be running on `http://localhost:5000`.*
 
-### 🎨 3. Frontend Setup (React)
+### 3. Frontend Setup (React)
 
 The frontend handles the UI and user experiences.
 
@@ -115,12 +115,12 @@ The frontend handles the UI and user experiences.
 
 ---
 
-## 🔑 Demo Credentials
+## Demo Credentials
 
 Thanks to the `seed.sql` file, you already have test accounts to explore every facet of the casino.
 
 **Disclaimer:** All seeded accounts use the exact same password:
-👉 `Password@123`
+Password: `Password@123`
 
 * **Player:** `aryan@players.com` (High Roller) or `akash@players.com`
 * **Dealer:** `amit.dealer@fortuna.com` or `sneha.dealer@fortuna.com`
@@ -128,4 +128,4 @@ Thanks to the `seed.sql` file, you already have test accounts to explore every f
 
 ---
 
-*The house always wins but today, fortune favours the bold.* 🎲
+*The house always wins but today, fortune favours the bold.*
