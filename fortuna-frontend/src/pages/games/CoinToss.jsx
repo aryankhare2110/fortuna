@@ -137,10 +137,10 @@ export default function CoinToss() {
 
       {/* Result banner */}
       {result && (
-        <div className={`mb-6 py-3 px-8 rounded-2xl font-bold text-lg animate-fade-in text-center ${
+        <div className={`mb-4 py-3 px-8 rounded-2xl font-bold text-lg shadow-2xl animate-fade-in text-center z-10 relative ${
           result.outcome === "win"
-            ? "bg-casino-success/20 text-green-400 border border-green-600/40"
-            : "bg-casino-danger/20  text-red-400   border border-red-600/40"
+            ? "bg-green-900 text-white border-2 border-green-500"
+            : "bg-red-900   text-white border-2 border-red-500"
         }`}>
           {result.message}
           {result.outcome === "win" && (

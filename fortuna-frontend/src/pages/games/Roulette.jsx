@@ -120,7 +120,7 @@ export default function Roulette() {
       )}
 
       {/* Premium Wheel */}
-      <div className="relative w-64 h-64 sm:w-72 sm:h-72 mb-5 sm:mb-8 shadow-[0_20px_50px_rgba(0,0,0,0.8)] rounded-full perspective-[1000px]">
+      <div className="relative w-56 h-56 sm:w-64 sm:h-64 mt-4 sm:mt-6 mb-4 sm:mb-6 shadow-[0_20px_50px_rgba(0,0,0,0.8)] rounded-full perspective-[1000px]">
         {/* Outer wood/gold bezel */}
         <div className="absolute inset-[-16px] rounded-full border-[10px] border-[#4a2406] bg-[#3a1d04] shadow-[inset_0_0_30px_rgba(0,0,0,1),0_10px_20px_rgba(0,0,0,0.5)]">
           <div className="absolute inset-0 rounded-full border-[2px] border-yellow-600/50"></div>
@@ -180,10 +180,10 @@ export default function Roulette() {
 
       {/* Result banner */}
       {result && (
-        <div className={`mb-2 py-2 px-6 rounded-2xl font-bold text-base animate-fade-in text-center ${
+        <div className={`mb-3 py-2 px-8 rounded-2xl font-bold text-base shadow-2xl animate-fade-in text-center z-10 ${
           result.outcome === "win"
-            ? "bg-casino-success/20 text-green-400 border border-green-600/40"
-            : "bg-casino-danger/20  text-red-400   border border-red-600/40"
+            ? "bg-green-900 text-white border-2 border-green-500"
+            : "bg-red-900   text-white border-2 border-red-500"
         }`}>
           {result.message}
           {result.outcome === "win" && (

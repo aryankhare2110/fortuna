@@ -188,7 +188,7 @@ export default function Blackjack() {
       )}
 
       {/* Table */}
-      <div className="w-full max-w-2xl bg-black/30 rounded-3xl border border-white/10 p-2 sm:p-4 flex flex-col justify-between items-center h-[360px] sm:h-[420px]">
+      <div className="w-full max-w-2xl bg-black/30 rounded-3xl border border-white/10 p-2 flex flex-col justify-between items-center sm:p-4 min-h-[400px] sm:min-h-[480px]">
         {/* Dealer Area */}
         <div className="w-full h-[40%] flex justify-center items-start">
           {gameState !== STATES.IDLE && (
@@ -203,12 +203,12 @@ export default function Blackjack() {
         </div>
 
         {/* Center / Message Area */}
-        <div className="w-full h-[20%] flex justify-center items-center">
+        <div className="w-full min-h-[4rem] flex justify-center items-center z-20 relative">
           {result ? (
-            <div className={`text-center py-2 px-6 sm:py-3 sm:px-8 rounded-2xl font-bold text-base sm:text-lg animate-fade-in shadow-xl ${
-              result.outcome === "win"  ? "bg-casino-success/20 text-green-400 border border-green-600/40" :
-              result.outcome === "loss" ? "bg-casino-danger/20  text-red-400   border border-red-600/40"   :
-                                          "bg-yellow-900/20 text-yellow-400 border border-yellow-600/40"
+            <div className={`text-center py-2 px-6 sm:py-3 sm:px-8 rounded-2xl font-bold text-base sm:text-lg animate-fade-in shadow-2xl relative z-30 ${
+              result.outcome === "win"  ? "bg-green-900 text-white border-2 border-green-500" :
+              result.outcome === "loss" ? "bg-red-900 text-white border-2 border-red-500"   :
+                                          "bg-yellow-900 text-white border-2 border-yellow-500"
             }`}>
               {result.message}
               {result.outcome === "win" && (
