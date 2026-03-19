@@ -27,6 +27,15 @@ The application partitions the ecosystem into three distinct user roles, ensurin
 
 ---
 
+## Tech Stack
+
+- **Frontend:** React, Tailwind CSS (for premium physics-inspired layouts)
+- **Backend:** Python, Flask (lightweight, rapid API development)
+- **Database:** PostgreSQL (with `psycopg2` for parameterized queries)
+- **Architecture Pattern:** RESTful API with native SQL Triggers for ACID compliance
+
+---
+
 ## Getting Started
 
 Follow these instructions to run the Fortuna ecosystem locally on your machine.
