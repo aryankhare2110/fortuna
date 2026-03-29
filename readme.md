@@ -132,4 +132,4 @@ Password: `Password@123`
 
 ---
 
-*The house always wins but today, fortune favours the bold.*
+Made by Aryan Khare, Akash Adur and Pranshu Prakash
