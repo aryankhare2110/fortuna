@@ -5,7 +5,6 @@ from config import Config
 
 _pool: psycopg2.pool.SimpleConnectionPool | None = None
 
-
 def init_db_pool() -> None:
     global _pool
     _pool = psycopg2.pool.SimpleConnectionPool(
@@ -19,17 +18,14 @@ def init_db_pool() -> None:
     )
     print(f"[db] Connected to '{Config.DB_NAME}' on {Config.DB_HOST}:{Config.DB_PORT}")
 
-
 def get_db() -> psycopg2.extensions.connection:
     if _pool is None:
         raise RuntimeError("DB pool not initialised — call init_db_pool() first.")
     return _pool.getconn()
 
-
 def release_db(conn: psycopg2.extensions.connection) -> None:
     if _pool and conn:
         _pool.putconn(conn)
-
 
 def query(sql: str, params: tuple = (), fetchone: bool = False):
     conn = get_db()
@@ -44,7 +40,6 @@ def query(sql: str, params: tuple = (), fetchone: bool = False):
         raise e
     finally:
         release_db(conn)
-
 
 def execute(sql: str, params: tuple = (), returning: bool = False):
     conn = get_db()
