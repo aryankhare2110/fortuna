@@ -35,7 +35,6 @@ def get_profile(current_user):
 @player_bp.patch("/profile")
 @require_auth("player")
 def update_profile(current_user):
-    """Update username or last name only."""
     data    = request.get_json() or {}
     updates = {COLUMN_MAP[k]: v for k, v in data.items() if k in COLUMN_MAP and v}
 
@@ -137,7 +136,6 @@ def transaction_history(current_user):
 @player_bp.post("/rewards/redeem")
 @require_auth("player")
 def redeem_rewards(current_user):
-    """Rate: 100 points = 50.00 currency. Minimum redemption: 100 points."""
     data   = request.get_json() or {}
     points = int(data.get("points", 0))
 

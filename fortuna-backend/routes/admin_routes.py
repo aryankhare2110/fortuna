@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from db   import query, execute
+from db import query, execute
 from auth import require_auth, hash_password, is_old_enough
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/api/admin")
@@ -7,10 +7,6 @@ admin_bp = Blueprint("admin", __name__, url_prefix="/api/admin")
 @admin_bp.get("/dashboard")
 @require_auth("admin")
 def dashboard(current_user):
-    """
-    Platform-wide snapshot: revenue, player counts, game breakdown.
-    Uses a CTE to compute bet stats and player stats in one round-trip.
-    """
     summary = query(
         """
         WITH bet_stats AS (
@@ -74,12 +70,7 @@ def dashboard(current_user):
 @admin_bp.get("/revenue/daily")
 @require_auth("admin")
 def daily_revenue(current_user):
-    """
-    Daily revenue for the last N days (default 30).
-    Includes a cumulative running total using a window function.
-    """
     days = int(request.args.get("days", 30))
-
     rows = query(
         """
         SELECT
@@ -104,7 +95,6 @@ def daily_revenue(current_user):
 @admin_bp.get("/revenue/by-game")
 @require_auth("admin")
 def revenue_by_game(current_user):
-    """Detailed per-game revenue with average bet size and largest payout."""
     rows = query(
         """
         SELECT
@@ -129,10 +119,6 @@ def revenue_by_game(current_user):
 @admin_bp.get("/players")
 @require_auth("admin")
 def list_players(current_user):
-    """
-    Full player list with last activity and most recent ban reason.
-    Uses LEFT JOIN LATERAL to fetch the latest ban per player efficiently.
-    """
     page     = int(request.args.get("page", 1))
     per_page = int(request.args.get("per_page", 20))
     offset   = (page - 1) * per_page
@@ -169,7 +155,6 @@ def list_players(current_user):
 @admin_bp.get("/players/<int:player_id>")
 @require_auth("admin")
 def get_player(current_user, player_id):
-    """Full profile for a single player including leaderboard ranks."""
     player = query(
         """
         SELECT
@@ -195,7 +180,6 @@ def get_player(current_user, player_id):
 @admin_bp.post("/players")
 @require_auth("admin")
 def create_player(current_user):
-    """Admin manually creates a player account."""
     data = request.get_json() or {}
 
     required = ["username", "first_name", "dob", "email", "password"]
@@ -236,9 +220,6 @@ def create_player(current_user):
 @admin_bp.post("/players/<int:player_id>/ban")
 @require_auth("admin")
 def ban_player(current_user, player_id):
-    """
-    Ban or unban a player via the admin dashboard.
-    """
     player = query(
         "SELECT Username, BlockStatus FROM Player WHERE PlayerID = %s",
         (player_id,),
@@ -259,7 +240,6 @@ def ban_player(current_user, player_id):
 @admin_bp.get("/players/top-spenders")
 @require_auth("admin")
 def top_spenders(current_user):
-    """Top 5 highest-spending players — VIP candidates."""
     rows = query(
         """
         SELECT
@@ -299,7 +279,6 @@ def list_dealers(current_user):
 @admin_bp.post("/dealers")
 @require_auth("admin")
 def create_dealer(current_user):
-    """Only admins can create dealer accounts — no public registration for dealers."""
     data = request.get_json() or {}
 
     required = ["first_name", "email", "password"]
@@ -357,7 +336,6 @@ def delete_dealer(current_user, dealer_id):
 @admin_bp.get("/games")
 @require_auth("admin")
 def list_games(current_user):
-    """All games including inactive ones (dealers only see active games)."""
     games = query(
         "SELECT GameID, GameName, MinBet, MaxBet, IsActive FROM Game ORDER BY GameID"
     )
@@ -367,10 +345,6 @@ def list_games(current_user):
 @admin_bp.patch("/games/<int:game_id>")
 @require_auth("admin")
 def update_game(current_user, game_id):
-    """
-    Update game settings (MinBet, MaxBet, IsActive).
-    Every change is logged to Game_Config_Log with a JSONB diff.
-    """
     data    = request.get_json() or {}
     allowed = {"min_bet": "MinBet", "max_bet": "MaxBet", "is_active": "IsActive"}
     updates = {allowed[k]: v for k, v in data.items() if k in allowed}
@@ -416,7 +390,6 @@ def update_game(current_user, game_id):
 @admin_bp.get("/games/<int:game_id>/config-log")
 @require_auth("admin")
 def game_config_log(current_user, game_id):
-    """Full audit trail of changes made to a game's configuration."""
     logs = query(
         """
         SELECT
@@ -445,7 +418,6 @@ def refresh_leaderboard(current_user):
 @admin_bp.get("/leaderboard")
 @require_auth("admin")
 def full_leaderboard(current_user):
-    """Full leaderboard for all three metrics — not capped at 10 like the public endpoint."""
     metric = request.args.get("metric", "total_winnings")
     valid  = ("total_winnings", "net_profit", "games_played")
 
