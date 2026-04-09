@@ -60,16 +60,38 @@ def deposit(current_user):
 
     amount = float(amount)
 
-    result = execute(
-        """
-        UPDATE Player
-        SET WalletBalance = WalletBalance + %s
-        WHERE PlayerID = %s
-        RETURNING WalletBalance
-        """,
-        (amount, current_user["id"]),
-        returning=True
-    )
+    from db import get_db, release_db
+    import psycopg2
+    import psycopg2.extras
+
+    conn = get_db()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            # Lock the row immediately with NOWAIT to enforce serializability
+            cur.execute("SELECT WalletBalance FROM Player WHERE PlayerID = %s FOR UPDATE NOWAIT", (current_user["id"],))
+            
+            # Simulate a slow transaction for demonstrating conflict!
+            cur.execute("SELECT pg_sleep(3)")
+
+            cur.execute(
+                """
+                UPDATE Player
+                SET WalletBalance = WalletBalance + %s
+                WHERE PlayerID = %s
+                RETURNING WalletBalance
+                """,
+                (amount, current_user["id"])
+            )
+            result = cur.fetchone()
+        conn.commit()
+    except psycopg2.errors.LockNotAvailable:
+        conn.rollback()
+        return jsonify({"error": "Transaction Conflict: Your wallet is currently locked by another active operation. Please wait."}), 409
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        release_db(conn)
 
     return jsonify({
         "message":        "Deposit successful",
@@ -88,24 +110,40 @@ def withdraw(current_user):
 
     amount = float(amount)
 
-    player = query(
-        "SELECT WalletBalance FROM Player WHERE PlayerID = %s",
-        (current_user["id"],),
-        fetchone=True
-    )
-    if float(player["walletbalance"]) < amount:
-        return jsonify({"error": "Insufficient balance"}), 400
+    from db import get_db, release_db
+    import psycopg2
+    import psycopg2.extras
 
-    result = execute(
-        """
-        UPDATE Player
-        SET WalletBalance = WalletBalance - %s
-        WHERE PlayerID = %s
-        RETURNING WalletBalance
-        """,
-        (amount, current_user["id"]),
-        returning=True
-    )
+    conn = get_db()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            # Use FOR UPDATE NOWAIT to prevent double-spending withdrawals and catch conflicts
+            cur.execute("SELECT WalletBalance FROM Player WHERE PlayerID = %s FOR UPDATE NOWAIT", (current_user["id"],))
+            player = cur.fetchone()
+
+            if float(player["walletbalance"]) < amount:
+                conn.rollback()
+                return jsonify({"error": "Insufficient balance"}), 400
+
+            cur.execute(
+                """
+                UPDATE Player
+                SET WalletBalance = WalletBalance - %s
+                WHERE PlayerID = %s
+                RETURNING WalletBalance
+                """,
+                (amount, current_user["id"])
+            )
+            result = cur.fetchone()
+        conn.commit()
+    except psycopg2.errors.LockNotAvailable:
+        conn.rollback()
+        return jsonify({"error": "Transaction Conflict: Your wallet is currently locked by another active operation. Please wait."}), 409
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        release_db(conn)
 
     return jsonify({
         "message":        "Withdrawal successful",
@@ -142,36 +180,51 @@ def redeem_rewards(current_user):
     if points < 100 or points % 100 != 0:
         return jsonify({"error": "Redeem in multiples of 100 points (min 100)"}), 400
 
-    player = query(
-        "SELECT RewardPoints, WalletBalance FROM Player WHERE PlayerID = %s",
-        (current_user["id"],),
-        fetchone=True
-    )
-    if player["rewardpoints"] < points:
-        return jsonify({"error": "Insufficient reward points"}), 400
+    from db import get_db, release_db
+    import psycopg2
+    import psycopg2.extras
 
-    credit = (points / 100) * 50.0
+    conn = get_db()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("SELECT RewardPoints, WalletBalance FROM Player WHERE PlayerID = %s FOR UPDATE NOWAIT", (current_user["id"],))
+            player = cur.fetchone()
 
-    result = execute(
-        """
-        UPDATE Player
-        SET RewardPoints  = RewardPoints  - %s,
-            WalletBalance = WalletBalance + %s
-        WHERE PlayerID = %s
-        RETURNING WalletBalance, RewardPoints
-        """,
-        (points, credit, current_user["id"]),
-        returning=True
-    )
+            if player["rewardpoints"] < points:
+                conn.rollback()
+                return jsonify({"error": "Insufficient reward points"}), 400
 
-    execute(
-        """
-        INSERT INTO Wallet_Transaction
-            (PlayerID, Type, Amount, BalanceAfter, PointTransaction)
-        VALUES (%s, 'reward_redemption', %s, %s, %s)
-        """,
-        (current_user["id"], credit, result["walletbalance"], -points)
-    )
+            credit = (points / 100) * 50.0
+
+            cur.execute(
+                """
+                UPDATE Player
+                SET RewardPoints  = RewardPoints  - %s,
+                    WalletBalance = WalletBalance + %s
+                WHERE PlayerID = %s
+                RETURNING WalletBalance, RewardPoints
+                """,
+                (points, credit, current_user["id"])
+            )
+            result = cur.fetchone()
+
+            cur.execute(
+                """
+                INSERT INTO Wallet_Transaction
+                    (PlayerID, Type, Amount, BalanceAfter, PointTransaction)
+                VALUES (%s, 'reward_redemption', %s, %s, %s)
+                """,
+                (current_user["id"], credit, result["walletbalance"], -points)
+            )
+        conn.commit()
+    except psycopg2.errors.LockNotAvailable:
+        conn.rollback()
+        return jsonify({"error": "Transaction Conflict: Your wallet is currently locked by another active operation. Please wait."}), 409
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        release_db(conn)
 
     return jsonify({
         "message":        f"Redeemed {points} points for {credit:.2f}",
